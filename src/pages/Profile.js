@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { getAuth, updateProfile } from "firebase/auth";
-import { updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase.config";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Profile = () => {
   const auth = getAuth();
@@ -22,8 +23,30 @@ const Profile = () => {
     navigate("/");
   };
 
-  const onSubmit = () => {
-    console.log(123);
+  const onSubmit = async () => {
+    try {
+      if (auth.currentUser.displayName !== name) {
+        // Update display name in firebase
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+        });
+
+        // Update display name in firestore
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(userRef, {
+          name,
+        });
+      }
+    } catch (error) {
+      toast.error("Could not update profile details");
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
   };
 
   return (
@@ -54,6 +77,16 @@ const Profile = () => {
               id="name"
               className={!changeDetails ? "profileName" : "profileNameActive"}
               disabled={!changeDetails}
+              value={name}
+              onChange={handleChange}
+            />
+            <input
+              type="text"
+              id="email"
+              className={!changeDetails ? "profileEmail" : "profileEmailActive"}
+              disabled={!changeDetails}
+              value={email}
+              onChange={handleChange}
             />
           </form>
         </div>
