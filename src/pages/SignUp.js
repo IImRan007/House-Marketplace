@@ -17,6 +17,7 @@ const SignUp = () => {
     email: "",
     password: "",
   });
+
   const { name, email, password } = formData;
 
   const navigate = useNavigate();
