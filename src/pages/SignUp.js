@@ -1,36 +1,36 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
-import visibilityIcon from "../assets/svg/visibilityIcon.svg";
+import { toast } from "react-toastify";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { db } from "../firebase.config";
 import { setDoc, doc, serverTimestamp } from "firebase/firestore";
-import { toast } from "react-toastify";
+import { db } from "../firebase.config";
+import OAuth from "../components/OAuth";
+import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
+import visibilityIcon from "../assets/svg/visibilityIcon.svg";
 
-const SignUp = () => {
+function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
-
   const { name, email, password } = formData;
 
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const onChange = (e) => {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
 
     try {
@@ -49,8 +49,8 @@ const SignUp = () => {
       });
 
       const formDataCopy = { ...formData };
-      delete formDataCopy.password; // delete password before storing to db
-      formDataCopy.timestamp = serverTimestamp(); // add timestamp property to db
+      delete formDataCopy.password;
+      formDataCopy.timestamp = serverTimestamp();
 
       await setDoc(doc(db, "users", user.uid), formDataCopy);
 
@@ -66,23 +66,25 @@ const SignUp = () => {
         <header>
           <p className="pageHeader">Welcome Back!</p>
         </header>
-        <form onSubmit={handleSubmit}>
+
+        <form onSubmit={onSubmit}>
           <input
             type="text"
-            placeholder="Name"
             className="nameInput"
+            placeholder="Name"
             id="name"
             value={name}
-            onChange={handleChange}
+            onChange={onChange}
           />
           <input
             type="email"
-            placeholder="Email"
             className="emailInput"
+            placeholder="Email"
             id="email"
             value={email}
-            onChange={handleChange}
+            onChange={onChange}
           />
+
           <div className="passwordInputDiv">
             <input
               type={showPassword ? "text" : "password"}
@@ -90,8 +92,9 @@ const SignUp = () => {
               placeholder="Password"
               id="password"
               value={password}
-              onChange={handleChange}
+              onChange={onChange}
             />
+
             <img
               src={visibilityIcon}
               alt="show password"
@@ -99,9 +102,11 @@ const SignUp = () => {
               onClick={() => setShowPassword((prevState) => !prevState)}
             />
           </div>
+
           <Link to="/forgot-password" className="forgotPasswordLink">
             Forgot Password
           </Link>
+
           <div className="signUpBar">
             <p className="signUpText">Sign Up</p>
             <button className="signUpButton">
@@ -109,13 +114,15 @@ const SignUp = () => {
             </button>
           </div>
         </form>
-        {/* Google OAuth*/}
+
+        <OAuth />
+
         <Link to="/sign-in" className="registerLink">
           Sign In Instead
         </Link>
       </div>
     </>
   );
-};
+}
 
 export default SignUp;
